@@ -181,7 +181,8 @@
   }
   .kpi-icon { font-size: 20px; margin-bottom: 8px; }
   .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .kpi-value { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 8px; }
+  .kpi-value { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px; }
+  .kpi-year-badge { display: inline-block; font-size: 10px; font-weight: 600; color: var(--text-muted); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; padding: 1px 7px; margin-bottom: 8px; letter-spacing: 0.3px; }
   .kpi-trend { font-size: 12px; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
   .trend-up { color: #34d399; }
   .trend-down { color: #f87171; }
@@ -38536,6 +38537,7 @@ function buildKPI() {
       <div class="kpi-icon">${kpi.icon}</div>
       <div class="kpi-label">${kpi.label}</div>
       <div class="kpi-value" id="kpiVal${i}">0</div>
+      <div class="kpi-year-badge">${kpi.key === 'totalWeeks' ? '전체 누적' : lastYear.year + '년 주간 평균'}</div>
       <div class="kpi-trend">${trendHtml}</div>
       <canvas class="kpi-sparkline" id="kpiSpark${i}" width="120" height="36"></canvas>
     `;
