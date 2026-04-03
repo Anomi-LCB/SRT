@@ -204,6 +204,13 @@
   .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
   .card-title { font-size: 15px; font-weight: 700; color: #c8deff; }
   .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card-body { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 2000px; opacity: 1; }
+  .card.collapsed .card-body { max-height: 0; opacity: 0; }
+  .card.collapsed .card-header { margin-bottom: 0; }
+  .card-collapse-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 2px 4px; border-radius: 4px; display: flex; align-items: center; transition: color 0.2s; }
+  .card-collapse-btn:hover { color: #c8deff; }
+  .card-collapse-btn svg { width: 16px; height: 16px; transition: transform 0.3s ease; }
+  .card.collapsed .card-collapse-btn svg { transform: rotate(-90deg); }
 
   /* CHIPS */
   .chip {
@@ -364,7 +371,6 @@
     <div class="nav-item" data-target="sessions"><i data-lucide="layers" class="nav-icon"></i><span>주일낮 부별</span></div>
     <div class="nav-item" data-target="school"><i data-lucide="book-open" class="nav-icon"></i><span>교회학교</span></div>
     <div class="nav-item" data-target="dawn"><i data-lucide="sunrise" class="nav-icon"></i><span>새벽기도</span></div>
-    <div class="nav-item" data-target="special"><i data-lucide="star" class="nav-icon"></i><span>특별집회</span></div>
   </div>
   <div class="nav-section">
     <div class="nav-label">분석</div>
@@ -657,29 +663,6 @@
 <hr class="section-divider">
 
 <!-- SPECIAL SERVICES -->
-<section class="section" id="special">
-  <div class="section-header">
-    <div class="section-title" style="display:flex;align-items:center;gap:10px;">
-      <i data-lucide="star" style="width:24px;height:24px;color:#f59e0b;"></i>
-      특별집회 <span class="special-badge">새벽기도 300명 초과</span>
-    </div>
-    <div class="section-sub">새벽기도 참석 인원이 300명을 초과한 특별 집회·부흥회 데이터입니다. 일반 새벽기도 통계에서 분리됩니다.</div>
-  </div>
-
-  <div class="special-grid">
-    <div class="card">
-      <div class="card-header"><span class="card-title">연도별 특별집회 횟수</span></div>
-      <canvas id="specialCountChart"></canvas>
-    </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">특별집회 평균 참석 규모</span></div>
-      <canvas id="specialAvgChart"></canvas>
-    </div>
-  </div>
-
-</section>
-<hr class="section-divider">
-
 <!-- GROWTH -->
 <section class="section" id="growth">
   <div class="section-header">
@@ -39668,8 +39651,9 @@ function buildCompareInsight() {
 }
 
 // ===== GROWTH =====
-function buildSpecialSection() {
-  if (!document.getElementById('specialCountChart')) return;
+function buildSpecialSection() { /* 특별집회 섹션 제거됨 */ }
+
+function _removedSpecialSection() {
   const YEARS = getYears();
   const counts = YEARS.map(y => SPECIAL_WEEKS.filter(w => w.date.startsWith(String(y))).length);
   const avgVals = YEARS.map(y => {
@@ -39741,12 +39725,21 @@ function buildGrowthSection() {
     return lineDataset(m.label, data, m.color, false);
   });
 
+  const growthTooltip = {
+    ...TOOLTIP_DEFAULTS(),
+    callbacks: {
+      label: ctx => ctx.parsed.y !== null && ctx.parsed.y !== undefined
+        ? ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
+        : null
+    }
+  };
+
   const growthYoY = new Chart(document.getElementById('growthYoYChart'), {
     type: 'line',
     data: { labels: yLabels, datasets: yoyDatasets },
     options: {
       ...baseOptions(3.5),
-      plugins: { ...baseOptions(3.5).plugins, zoom: undefined },
+      plugins: { ...baseOptions(3.5).plugins, zoom: undefined, tooltip: growthTooltip },
       scales: {
         x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
         y: {
@@ -39762,35 +39755,46 @@ function buildGrowthSection() {
   (function() {
     const summaryEl = document.getElementById('growthSummary');
     if (!summaryEl) return;
-    const METRIC_LABELS = {
-      sundayMorningTotal_avg: '주일낮합계', sundayEvening_avg: '주일밤',
-      wednesdayEvening_avg: '수요밤', fridayAllNight_avg: '토요성회', sundaySchool_avg: '교회학교'
-    };
-    // 각 지표별 최근 YoY
-    const recentRows = annual.slice(-3); // 최근 3개 연도
+    const currentYear = new Date().getFullYear();
     let summaryLines = [];
-    summaryLines.push('<b>📊 전년 대비 성장률 보는 법:</b> 각 선이 0%보다 위면 전년 대비 성장, 아래면 감소를 나타냅니다.');
-    summaryLines.push('<b>📅 최근 연도 동향:</b>');
-    METRICS.forEach(m => {
-      const rows = annual.filter(a => a[m.key] != null);
-      if (rows.length < 2) return;
-      const last = rows[rows.length-1];
-      const prev = rows[rows.length-2];
-      const yoy = prev[m.key] ? Math.round((last[m.key]-prev[m.key])/prev[m.key]*100*10)/10 : null;
-      const arrow = yoy == null ? '' : yoy > 0 ? ' ▲' : yoy < 0 ? ' ▼' : ' –';
-      const color = yoy > 0 ? 'var(--accent-green)' : yoy < 0 ? '#ef4444' : 'var(--text-muted)';
-      summaryLines.push(`&nbsp;&nbsp;<span style="color:var(--text)">${m.label}</span>: ${last.year}년 ${last[m.key].toLocaleString()}명 <span style="color:${color};font-weight:600;">${yoy != null ? yoy+'%'+arrow : '데이터 없음'}</span>`);
-    });
-    // 역대 최고·최저 성장 연도
+
+    // 그래프 해석 안내
+    summaryLines.push('<b>📊 그래프 보는 법:</b> 각 선이 0% 위면 전년 대비 출석이 늘었음을, 아래면 줄었음을 나타냅니다. 선이 아래로 내려간다는 것은 <b>성장 속도가 둔화</b>되는 것이지, 반드시 출석 인원이 줄었다는 뜻이 아닙니다.');
+
+    // 최근 완전한 연도 기준 동향 (현재 연도는 미완성 데이터이므로 제외)
+    const completeAnnual = annual.filter(a => a.year < currentYear);
+    if (completeAnnual.length >= 2) {
+      const last = completeAnnual[completeAnnual.length - 1];
+      const prev = completeAnnual[completeAnnual.length - 2];
+      summaryLines.push(`<b>📅 ${last.year}년 (최근 완료 연도) 동향:</b>`);
+      METRICS.forEach(m => {
+        if (!last[m.key] || !prev[m.key]) return;
+        const yoy = Math.round((last[m.key] - prev[m.key]) / prev[m.key] * 100 * 10) / 10;
+        const arrow = yoy > 0 ? ' ▲' : yoy < 0 ? ' ▼' : ' –';
+        const color = yoy > 0 ? 'var(--accent-green)' : yoy < 0 ? '#ef4444' : 'var(--text-muted)';
+        summaryLines.push(`&nbsp;&nbsp;<span style="color:var(--text)">${m.label}</span>: 평균 ${last[m.key].toLocaleString()}명 (전년 ${prev[m.key].toLocaleString()}명 대비 <span style="color:${color};font-weight:600;">${yoy > 0 ? '+' : ''}${yoy}%${arrow}</span>)`);
+      });
+    }
+
+    // 현재 연도 미완성 데이터 안내
+    const incompleteRow = annual.find(a => a.year === currentYear);
+    if (incompleteRow) {
+      summaryLines.push(`<span style="color:#f59e0b">⚠️ ${currentYear}년 데이터는 현재까지 집계된 부분 데이터입니다. 연초(1~3월)는 계절적으로 출석이 낮은 시기이므로 연간 평균이 낮게 보일 수 있으며, 연말에 최종 확정됩니다.</span>`);
+    }
+
+    // 역대 최고·최저 성장 연도 (완료 연도 기준)
     const totalYoY = METRICS[0];
-    const yoyArr = annual.slice(1).map((a,i) => {
-      const prev = annual[i];
+    const yoyArr = completeAnnual.slice(1).map((a, i) => {
+      const prev = completeAnnual[i];
       if (!prev[totalYoY.key] || !a[totalYoY.key]) return null;
-      return { year: a.year, v: Math.round((a[totalYoY.key]-prev[totalYoY.key])/prev[totalYoY.key]*100*10)/10 };
-    }).filter(x=>x!=null);
-    const best = yoyArr.reduce((a,b)=>a.v>b.v?a:b);
-    const worst = yoyArr.reduce((a,b)=>a.v<b.v?a:b);
-    summaryLines.push(`<b>🏆 주일낮합계 역대 최고 성장:</b> <span style="color:var(--accent-green)">${best.year}년 +${best.v}%</span> &nbsp; <b>최저:</b> <span style="color:#ef4444">${worst.year}년 ${worst.v}%</span>`);
+      return { year: a.year, v: Math.round((a[totalYoY.key] - prev[totalYoY.key]) / prev[totalYoY.key] * 100 * 10) / 10 };
+    }).filter(x => x != null);
+    if (yoyArr.length) {
+      const best = yoyArr.reduce((a, b) => a.v > b.v ? a : b);
+      const worst = yoyArr.reduce((a, b) => a.v < b.v ? a : b);
+      summaryLines.push(`<b>🏆 주일낮합계 역대 최고 성장률:</b> <span style="color:var(--accent-green)">${best.year}년 +${best.v}%</span> &nbsp; <b>최저:</b> <span style="color:#ef4444">${worst.year}년 ${worst.v}%</span>`);
+    }
+
     summaryEl.innerHTML = summaryLines.join('<br>');
   })();
 
@@ -39811,7 +39815,7 @@ function buildGrowthSection() {
     data: { labels: yLabels, datasets: rollDatasets },
     options: {
       ...baseOptions(2.5),
-      plugins: { ...baseOptions(2.5).plugins, zoom: undefined },
+      plugins: { ...baseOptions(2.5).plugins, zoom: undefined, tooltip: growthTooltip },
       scales: {
         x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
         y: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR(), callback: v => v + '%' } }
@@ -39941,6 +39945,28 @@ document.addEventListener('DOMContentLoaded', () => {
   buildCompareSection();
   buildSpecialSection();
   buildGrowthSection();
+
+  // 그래프 박스 접기 기능
+  document.querySelectorAll('.card').forEach(card => {
+    const header = card.querySelector('.card-header');
+    if (!header) return;
+    // card-header 바로 아래 콘텐츠를 card-body로 감싸기
+    const children = Array.from(card.children).filter(el => !el.classList.contains('card-header'));
+    if (!children.length) return;
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    children.forEach(el => body.appendChild(el));
+    card.appendChild(body);
+    // 접기 버튼 추가
+    const btn = document.createElement('button');
+    btn.className = 'card-collapse-btn';
+    btn.title = '접기/펼치기';
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+    btn.addEventListener('click', () => card.classList.toggle('collapsed'));
+    const actions = header.querySelector('.card-actions');
+    if (actions) actions.prepend(btn);
+    else header.appendChild(btn);
+  });
 
   // 테마 토글
   const themeToggle = document.getElementById('themeToggle');
