@@ -336,7 +336,16 @@
     border: 1px solid #1a2d4a; padding: 24px;
     display: flex; flex-direction: column;
   }
-  #fsTitle { font-size: 16px; font-weight: 700; color: #c8deff; margin-bottom: 16px; }
+  #fsTitleBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  #fsTitle { font-size: 16px; font-weight: 700; color: #c8deff; }
+  #fsDownload {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px;
+    background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.35);
+    color: #93c5fd; font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  #fsDownload:hover { background: rgba(59,130,246,0.3); color: #fff; }
   #fsCanvasWrap { flex: 1; position: relative; }
   #fsCanvas { position: absolute; inset: 0; }
 
@@ -351,9 +360,87 @@
 
   /* Separator */
   .section-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+  /* ── 스페이싱 변수 ─────────────────────────────── */
+  :root {
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 20px; --sp-6: 24px; --sp-7: 28px; --sp-8: 32px;
+    --radius-card: 16px;
+  }
+
+  /* ── 라이트 모드 색상 보강 ─────────────────────── */
+  [data-theme="light"] .kpi-value        { color: #0f172a; }
+  [data-theme="light"] .card-title       { color: #1e3a5f; }
+  [data-theme="light"] .kpi-year-badge   { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #475569; }
+  [data-theme="light"] .stats-table td   { border-bottom-color: var(--border); }
+  [data-theme="light"] .stats-table tr:hover td { background: rgba(37,99,235,0.04); }
+  [data-theme="light"] .filter-btn       { color: #475569; }
+  [data-theme="light"] .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  [data-theme="light"] .chip             { color: #475569; }
+  [data-theme="light"] .icon-btn         { color: #475569; }
+  [data-theme="light"] .select-input, [data-theme="light"] .ma-select { background: #fff; color: #0f172a; }
+  [data-theme="light"] #fsInner          { background: #fff; border-color: var(--border); }
+  [data-theme="light"] #fsTitle          { color: #1e3a5f; }
+
+  /* ── 반응형 ────────────────────────────────────── */
+  /* 태블릿 (≤ 1024px) */
+  @media (max-width: 1024px) {
+    :root { --sidebar-w: 220px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-row-3 { grid-template-columns: 1fr 1fr; }
+    .compare-layout { grid-template-columns: 200px 1fr; }
+    .section { padding: var(--sp-8) var(--sp-6); }
+  }
+
+  /* 모바일 (≤ 768px) */
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 0px; }
+    #sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      width: 260px;
+      z-index: 200;
+    }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; }
+    .section { padding: var(--sp-6) var(--sp-4); }
+    .kpi-grid { grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+    .chart-row-2, .chart-row-3 { grid-template-columns: 1fr; }
+    .compare-layout { grid-template-columns: 1fr; }
+    .compare-panel { max-height: 260px; }
+    .hero-title { font-size: 26px; }
+    #fsInner { inset: 16px; padding: 16px; }
+    /* 모바일 햄버거 버튼 */
+    #menuToggle {
+      display: flex; position: fixed; top: 12px; left: 12px; z-index: 300;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); cursor: pointer;
+      align-items: center; justify-content: center;
+    }
+    #sidebarOverlay {
+      display: none; position: fixed; inset: 0; z-index: 190;
+      background: rgba(0,0,0,0.5);
+    }
+    #sidebarOverlay.open { display: block; }
+  }
+  @media (min-width: 769px) {
+    #menuToggle { display: none; }
+    #sidebarOverlay { display: none !important; }
+  }
+
+  /* 소형 모바일 (≤ 480px) */
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-value { font-size: 26px; }
+  }
 </style>
 </head>
 <body>
+
+<!-- 모바일 햄버거 버튼 & 오버레이 -->
+<button id="menuToggle" aria-label="메뉴 열기"><i data-lucide="menu"></i></button>
+<div id="sidebarOverlay"></div>
 
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -404,7 +491,14 @@
     </div>
     <!-- Overall Stats Table -->
     <div class="card">
-      <div class="card-header"><span class="card-title">전체 기간 통계 요약</span></div>
+      <div class="card-header">
+        <span class="card-title">전체 기간 통계 요약</span>
+        <div class="card-actions">
+          <button class="icon-btn" id="csvExportBtn" title="CSV 내보내기" style="width:auto;padding:0 10px;gap:5px;font-size:11px;font-weight:600;">
+            <i data-lucide="download" style="width:13px;height:13px;"></i> CSV
+          </button>
+        </div>
+      </div>
       <div id="overallStatsTable"></div>
     </div>
   </div>
@@ -471,6 +565,7 @@
       </div>
     </div>
     <div class="filter-bar" id="worshipYearFilter"></div>
+    <div class="filter-bar" id="worshipMonthFilter" style="display:none;"></div>
     <div class="card-actions" style="margin-bottom:12px;" id="worshipChips"></div>
     <canvas id="worshipMainChart"></canvas>
   </div>
@@ -508,6 +603,7 @@
       </div>
     </div>
     <div class="filter-bar" id="sessionsYearFilter"></div>
+    <div class="filter-bar" id="sessionsMonthFilter" style="display:none;"></div>
     <div class="card-actions" style="margin-bottom:12px;" id="sessionsChips"></div>
     <canvas id="sessionsMainChart"></canvas>
   </div>
@@ -545,6 +641,7 @@
       </div>
     </div>
     <div class="filter-bar" id="schoolYearFilter"></div>
+    <div class="filter-bar" id="schoolMonthFilter" style="display:none;"></div>
     <div class="card-actions" style="margin-bottom:12px;" id="schoolChips"></div>
     <canvas id="schoolMainChart"></canvas>
   </div>
@@ -582,6 +679,7 @@
       </div>
     </div>
     <div class="filter-bar" id="dawnYearFilter"></div>
+    <div class="filter-bar" id="dawnMonthFilter" style="display:none;"></div>
     <div class="card-actions" style="margin-bottom:12px;" id="dawnChips"></div>
     <canvas id="dawnMainChart"></canvas>
   </div>
@@ -700,7 +798,10 @@
 <div id="fsModal">
   <button id="fsClose">✕</button>
   <div id="fsInner">
-    <div id="fsTitle"></div>
+    <div id="fsTitleBar">
+      <div id="fsTitle"></div>
+      <button id="fsDownload"><i data-lucide="download" style="width:14px;height:14px;"></i> PNG 저장</button>
+    </div>
     <div id="fsCanvasWrap"><canvas id="fsCanvas"></canvas></div>
   </div>
 </div>
@@ -38330,11 +38431,21 @@ function TOOLTIP_DEFAULTS() {
   };
 }
 
-// Theme-aware chart colors (읽을 때마다 현재 테마 반영)
-function GRID_COLOR() { return getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() || 'rgba(26,45,74,0.5)'; }
-function TICK_COLOR() { return getComputedStyle(document.documentElement).getPropertyValue('--chart-tick').trim() || '#4d7090'; }
-function TOOLTIP_BG() { return getComputedStyle(document.documentElement).getPropertyValue('--tooltip-bg').trim() || '#0d1520'; }
-function TOOLTIP_BORDER() { return getComputedStyle(document.documentElement).getPropertyValue('--tooltip-border').trim() || '#1a2d4a'; }
+// Theme-aware chart colors — cached, refreshed on theme change
+let _chartColorCache = {};
+function _refreshChartColorCache() {
+  const s = getComputedStyle(document.documentElement);
+  _chartColorCache = {
+    grid:    s.getPropertyValue('--chart-grid').trim()   || 'rgba(26,45,74,0.5)',
+    tick:    s.getPropertyValue('--chart-tick').trim()   || '#4d7090',
+    tipBg:   s.getPropertyValue('--tooltip-bg').trim()   || '#0d1520',
+    tipBord: s.getPropertyValue('--tooltip-border').trim() || '#1a2d4a',
+  };
+}
+function GRID_COLOR()    { return _chartColorCache.grid    || 'rgba(26,45,74,0.5)'; }
+function TICK_COLOR()    { return _chartColorCache.tick    || '#4d7090'; }
+function TOOLTIP_BG()    { return _chartColorCache.tipBg   || '#0d1520'; }
+function TOOLTIP_BORDER(){ return _chartColorCache.tipBord || '#1a2d4a'; }
 
 function baseScales() {
   const g = GRID_COLOR(), t = TICK_COLOR();
@@ -38386,9 +38497,47 @@ function lineDataset(label, data, color, fill) {
 }
 
 // Filter weekly by year
-function filterWeekly(data, year) {
-  if (!year || year === 'all') return data;
-  return data.filter(d => d.date.startsWith(String(year)));
+function filterWeekly(data, year, month) {
+  let result = data;
+  if (year && year !== 'all') result = result.filter(d => d.date.startsWith(String(year)));
+  if (month && month !== 'all') result = result.filter(d => d.date.slice(5, 7) === String(month).padStart(2, '0'));
+  return result;
+}
+
+const MONTH_LABELS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+function makeMonthFilter(containerId, getYear, callback) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  // 선택된 연도가 'all'이면 월 필터 숨김
+  const yearFilterId = containerId.replace('Month', 'Year');
+  function refresh(selectedYear) {
+    if (!selectedYear || selectedYear === 'all') { el.style.display = 'none'; return; }
+    el.style.display = 'flex';
+    el.innerHTML = '';
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-btn active'; allBtn.textContent = '전체 월';
+    allBtn.dataset.month = 'all';
+    allBtn.addEventListener('click', () => {
+      el.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      allBtn.classList.add('active'); callback('all');
+    });
+    el.appendChild(allBtn);
+    MONTH_LABELS.forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn'; btn.textContent = label;
+      btn.dataset.month = String(i + 1);
+      btn.addEventListener('click', () => {
+        el.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active'); callback(btn.dataset.month);
+      });
+      el.appendChild(btn);
+    });
+  }
+  // 초기 상태: 연도 필터에서 현재 연도 읽어서 초기화
+  refresh(getYear());
+  return refresh; // 외부에서 연도 변경 시 호출 가능하도록 반환
 }
 
 // Get unique years from weekly
@@ -38714,6 +38863,29 @@ function buildOverallTable() {
   container.innerHTML = html;
 }
 
+// ===== CSV EXPORT =====
+function exportWeeklyCSV() {
+  const headers = ['날짜','주일낮합계','주일낮1부','주일낮2부','주일낮3부','주일낮4부','주일밤','수요밤','금요철야','교회학교합계'];
+  const rows = weekly.map(d => [
+    d.date,
+    d.worship?.sundayMorningTotal ?? '',
+    d.worship?.sundayMorning1st   ?? '',
+    d.worship?.sundayMorning2nd   ?? '',
+    d.worship?.sundayMorning3rd   ?? '',
+    d.worship?.sundayMorning4th   ?? '',
+    d.worship?.sundayEvening      ?? '',
+    d.worship?.wednesdayEvening   ?? '',
+    d.worship?.fridayAllNight     ?? '',
+    d.sundaySchool?.total         ?? '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '예배통계_전체데이터.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ===== ANNUAL CHARTS =====
 function buildAnnualCharts() {
   const labels = annual.map(a => String(a.year));
@@ -38819,12 +38991,13 @@ const WORSHIP_FIELDS = [
 ];
 
 let worshipYear = 'all';
+let worshipMonth = 'all';
 let worshipVisible = new Set(WORSHIP_FIELDS.filter(f=>f.active).map(f=>f.key));
 let worshipMAVal = 0;
 let worshipMainChart;
 
 function buildWorshipMain() {
-  const data = filterWeekly(weekly, worshipYear);
+  const data = filterWeekly(weekly, worshipYear, worshipMonth);
   const labels = data.map(d => d.date);
 
   const datasets = WORSHIP_FIELDS.filter(f => worshipVisible.has(f.key)).map(f => {
@@ -38909,7 +39082,12 @@ function buildWorshipHist() {
 }
 
 function buildWorshipSection() {
-  makeYearFilter('worshipYearFilter', y => { worshipYear = y; buildWorshipMain(); });
+  const refreshWorshipMonth = makeMonthFilter('worshipMonthFilter', () => worshipYear, m => { worshipMonth = m; buildWorshipMain(); });
+  makeYearFilter('worshipYearFilter', y => {
+    worshipYear = y; worshipMonth = 'all';
+    if (refreshWorshipMonth) refreshWorshipMonth(y);
+    buildWorshipMain();
+  });
   makeChips('worshipChips', WORSHIP_FIELDS, (key, active) => {
     if (active) worshipVisible.add(key); else worshipVisible.delete(key);
     buildWorshipMain();
@@ -38940,11 +39118,12 @@ const SESSION_FIELDS = [
   { key: 'happyLoveDept', label: '행복한사랑부', color: '#F03E3E', active: false },
 ];
 let sessionsYear = 'all';
+let sessionsMonth = 'all';
 let sessionsVisible = new Set(SESSION_FIELDS.filter(f=>f.active).map(f=>f.key));
 let sessionsMainChart;
 
 function buildSessionsMain() {
-  const data = filterWeekly(weekly, sessionsYear);
+  const data = filterWeekly(weekly, sessionsYear, sessionsMonth);
   const labels = data.map(d => d.date);
   const datasets = SESSION_FIELDS.filter(f => sessionsVisible.has(f.key)).map(f => ({
     ...lineDataset(f.label, data.map(d => d.worship?.[f.key] ?? null), f.color, false),
@@ -38956,6 +39135,7 @@ function buildSessionsMain() {
   registerChart('sessionsMainChart', sessionsMainChart);
 }
 
+let sessionsStackBarChart = null;
 function buildSessionsStackBar() {
   const years = YEARS;
   const datasets = SESSION_FIELDS.slice(0, 4).map(f => {
@@ -38970,7 +39150,8 @@ function buildSessionsStackBar() {
       borderRadius: 2,
     };
   });
-  new Chart(document.getElementById('sessionsStackBar'), {
+  if (sessionsStackBarChart) sessionsStackBarChart.destroy();
+  sessionsStackBarChart = new Chart(document.getElementById('sessionsStackBar'), {
     type: 'bar',
     data: { labels: years, datasets },
     options: {
@@ -38982,6 +39163,7 @@ function buildSessionsStackBar() {
       }
     }
   });
+  registerChart('sessionsStackBar', sessionsStackBarChart);
 }
 
 // 도넛 중앙 텍스트 플러그인 (공통)
@@ -39090,7 +39272,12 @@ function buildSessionsDoughnut(year) {
 }
 
 function buildSessionsSection() {
-  makeYearFilter('sessionsYearFilter', y => { sessionsYear = y; buildSessionsMain(); });
+  const refreshSessionsMonth = makeMonthFilter('sessionsMonthFilter', () => sessionsYear, m => { sessionsMonth = m; buildSessionsMain(); });
+  makeYearFilter('sessionsYearFilter', y => {
+    sessionsYear = y; sessionsMonth = 'all';
+    if (refreshSessionsMonth) refreshSessionsMonth(y);
+    buildSessionsMain();
+  });
   makeChips('sessionsChips', SESSION_FIELDS, (key, active) => {
     if (active) sessionsVisible.add(key); else sessionsVisible.delete(key);
     buildSessionsMain();
@@ -39118,11 +39305,12 @@ const SCHOOL_FIELDS = [
   { key: 'total', label: '합계', color: '#37B24D', active: false },
 ];
 let schoolYear = 'all';
+let schoolMonth = 'all';
 let schoolVisible = new Set(SCHOOL_FIELDS.filter(f=>f.active).map(f=>f.key));
 let schoolMainChart;
 
 function buildSchoolMain() {
-  const data = filterWeekly(weekly, schoolYear);
+  const data = filterWeekly(weekly, schoolYear, schoolMonth);
   const labels = data.map(d => d.date);
   const datasets = SCHOOL_FIELDS.filter(f => schoolVisible.has(f.key)).map(f => ({
     ...lineDataset(f.label, data.map(d => d.sundaySchool?.[f.key] ?? null), f.color, true),
@@ -39134,6 +39322,7 @@ function buildSchoolMain() {
   registerChart('schoolMainChart', schoolMainChart);
 }
 
+let schoolStackBarChart = null;
 function buildSchoolStackBar() {
   const years = YEARS;
   const fields = SCHOOL_FIELDS.filter(f => f.key !== 'total');
@@ -39144,7 +39333,8 @@ function buildSchoolStackBar() {
     });
     return { label: f.label, data, backgroundColor: f.color + 'cc', borderRadius: 2 };
   });
-  new Chart(document.getElementById('schoolStackBar'), {
+  if (schoolStackBarChart) schoolStackBarChart.destroy();
+  schoolStackBarChart = new Chart(document.getElementById('schoolStackBar'), {
     type: 'bar',
     data: { labels: years, datasets },
     options: {
@@ -39156,6 +39346,7 @@ function buildSchoolStackBar() {
       }
     }
   });
+  registerChart('schoolStackBar', schoolStackBarChart);
 }
 
 let schoolDoughnutChart = null;
@@ -39181,7 +39372,12 @@ function buildSchoolDoughnut(year) {
 }
 
 function buildSchoolSection() {
-  makeYearFilter('schoolYearFilter', y => { schoolYear = y; buildSchoolMain(); });
+  const refreshSchoolMonth = makeMonthFilter('schoolMonthFilter', () => schoolYear, m => { schoolMonth = m; buildSchoolMain(); });
+  makeYearFilter('schoolYearFilter', y => {
+    schoolYear = y; schoolMonth = 'all';
+    if (refreshSchoolMonth) refreshSchoolMonth(y);
+    buildSchoolMain();
+  });
   makeChips('schoolChips', SCHOOL_FIELDS, (key, active) => {
     if (active) schoolVisible.add(key); else schoolVisible.delete(key);
     buildSchoolMain();
@@ -39221,11 +39417,12 @@ const DAWN_FIELDS = [
   { key: 'sundayDawn', label: '주일새벽', color: '#F03E3E', active: true },
 ];
 let dawnYear = 'all';
+let dawnMonth = 'all';
 let dawnVisible = new Set(DAWN_FIELDS.filter(f=>f.active).map(f=>f.key));
 let dawnMainChart;
 
 function buildDawnMain() {
-  const data = filterWeekly(weekly, dawnYear);
+  const data = filterWeekly(weekly, dawnYear, dawnMonth);
   const labels = data.map(d => d.date);
   const datasets = DAWN_FIELDS.filter(f => dawnVisible.has(f.key)).map(f => ({
     ...lineDataset(f.label, data.map(d => dawnNormal(d.dawnPrayer?.[f.key])), f.color, false),
@@ -39348,10 +39545,16 @@ function buildDawnMonBar() {
     data: { labels: years, datasets },
     options: opts
   });
+  registerChart('dawnMonBar', dawnMonBarChart);
 }
 
 function buildDawnSection() {
-  makeYearFilter('dawnYearFilter', y => { dawnYear = y; buildDawnMain(); });
+  const refreshDawnMonth = makeMonthFilter('dawnMonthFilter', () => dawnYear, m => { dawnMonth = m; buildDawnMain(); });
+  makeYearFilter('dawnYearFilter', y => {
+    dawnYear = y; dawnMonth = 'all';
+    if (refreshDawnMonth) refreshDawnMonth(y);
+    buildDawnMain();
+  });
   makeChips('dawnChips', DAWN_FIELDS, (key, active) => {
     if (active) dawnVisible.add(key); else dawnVisible.delete(key);
     buildDawnMain();
@@ -39653,56 +39856,7 @@ function buildCompareInsight() {
 }
 
 // ===== GROWTH =====
-function buildSpecialSection() { /* 특별집회 섹션 제거됨 */ }
-
-function _removedSpecialSection() {
-  const YEARS = getYears();
-  const counts = YEARS.map(y => SPECIAL_WEEKS.filter(w => w.date.startsWith(String(y))).length);
-  const avgVals = YEARS.map(y => {
-    const ws = SPECIAL_WEEKS.filter(w => w.date.startsWith(String(y)));
-    return ws.length ? Math.round(ws.reduce((a,b) => a + b.maxVal, 0) / ws.length) : null;
-  });
-  const DAY_LABELS = {
-    mon1st:'월1부', mon2nd:'월2부', tue1st:'화1부', tue2nd:'화2부',
-    wed1st:'수1부', wed2nd:'수2부', thu1st:'목1부', thu2nd:'목2부',
-    fri1st:'금1부', fri2nd:'금2부', sundayDawn:'주일새벽'
-  };
-  const barOpts = {
-    ...baseOptions(2.5),
-    plugins: { ...baseOptions(2.5).plugins, zoom: undefined, legend: { display: false } },
-    spanGaps: true
-  };
-
-  new Chart(document.getElementById('specialCountChart'), {
-    type: 'bar',
-    data: {
-      labels: YEARS,
-      datasets: [{ label: '특별집회 횟수', data: counts,
-        backgroundColor: 'rgba(251,191,36,0.28)', borderColor: '#f59e0b',
-        borderWidth: 2, borderRadius: 6
-      }]
-    },
-    options: { ...barOpts, plugins: { ...barOpts.plugins,
-      tooltip: { ...TOOLTIP_DEFAULTS(), callbacks: { label: ctx => ' ' + ctx.parsed.y + '회' } }
-    }}
-  });
-
-  new Chart(document.getElementById('specialAvgChart'), {
-    type: 'bar',
-    data: {
-      labels: YEARS,
-      datasets: [{ label: '평균 최대 참석', data: avgVals,
-        backgroundColor: 'rgba(239,68,68,0.22)', borderColor: '#ef4444',
-        borderWidth: 2, borderRadius: 6
-      }]
-    },
-    options: { ...barOpts, plugins: { ...barOpts.plugins,
-      tooltip: { ...TOOLTIP_DEFAULTS(), callbacks: { label: ctx => ctx.parsed.y ? ' 평균 ' + Math.round(ctx.parsed.y).toLocaleString() + '명' : null } }
-    }}
-  });
-
-  // 특별집회 목록은 표시하지 않음
-}
+function buildSpecialSection() {}
 
 function buildGrowthSection() {
   const METRICS = [
@@ -39880,6 +40034,17 @@ function setupFullscreen() {
     if (e.target === document.getElementById('fsModal')) closeFullscreen();
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullscreen(); });
+
+  // PNG 저장
+  document.getElementById('fsDownload').addEventListener('click', () => {
+    if (!fsCurrentChart) return;
+    const title = document.getElementById('fsTitle').textContent || '차트';
+    const url = fsCurrentChart.toBase64Image('image/png', 1);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.png`;
+    a.click();
+  });
 }
 
 function openFullscreen(chartId, title) {
@@ -39979,9 +40144,10 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('theme', theme);
     if (themeLabel) themeLabel.textContent = theme === 'light' ? '다크 모드' : '라이트 모드';
     if (themeIcon) { themeIcon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun'); lucide.createIcons(); }
-    // 차트 색상 재갱신
-    setTimeout(() => Object.values(chartRegistry).forEach(c => { try { c.update(); } catch(e){} }), 50);
+    // 차트 색상 캐시 갱신 후 모든 차트 업데이트
+    setTimeout(() => { _refreshChartColorCache(); Object.values(chartRegistry).forEach(c => { try { c.update(); } catch(e){} }); }, 50);
   }
+  _refreshChartColorCache(); // 초기 캐시 로드
   const savedTheme = localStorage.getItem('theme') || 'dark';
   applyTheme(savedTheme);
   if (themeToggle) themeToggle.addEventListener('click', () => {
@@ -39992,11 +40158,37 @@ document.addEventListener('DOMContentLoaded', () => {
   // Lucide 아이콘 렌더링
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
+  document.getElementById('csvExportBtn')?.addEventListener('click', exportWeeklyCSV);
+
   setupNav();
   setupScrollSpy();
   setupFullscreen();
   setupZoomReset();
   observeCards();
+
+  // 모바일 햄버거 메뉴
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebarEl  = document.getElementById('sidebar');
+  const overlay    = document.getElementById('sidebarOverlay');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+      sidebarEl.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+    overlay.addEventListener('click', () => {
+      sidebarEl.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+    // 네비 클릭 시 사이드바 닫기 (모바일)
+    sidebarEl.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          sidebarEl.classList.remove('open');
+          overlay.classList.remove('open');
+        }
+      });
+    });
+  }
   // Lucide 최종 렌더링
   requestAnimationFrame(() => {
     if (typeof lucide !== 'undefined') lucide.createIcons();
