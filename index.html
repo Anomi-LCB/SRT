@@ -29,45 +29,93 @@
     --tooltip-border: #1a2d4a;
   }
   [data-theme="light"] {
-    --bg: #f1f5f9;
+    --bg: #f5f7fb;
     --surface: #ffffff;
     --card: #ffffff;
     --sidebar: #1e293b;
-    --border: #e2e8f0;
-    --accent: #2563eb;
-    --accent-purple: #7c3aed;
-    --accent-green: #059669;
-    --accent-orange: #d97706;
-    --accent-pink: #db2777;
-    --text: #0f172a;
-    --text-muted: #64748b;
-    --chart-grid: rgba(203,213,225,0.7);
-    --chart-tick: #64748b;
+    --border: #e8edf5;
+    --accent: #4f7ef8;
+    --accent-purple: #8b68f0;
+    --accent-green: #34c48a;
+    --accent-orange: #f0a855;
+    --accent-pink: #f472b6;
+    --text: #1e2d45;
+    --text-muted: #7a90ad;
+    --chart-grid: rgba(180,200,225,0.28);
+    --chart-tick: #94a9c2;
+    --chart-doughnut-border: rgba(245,247,251,0.95);
     --tooltip-bg: #ffffff;
-    --tooltip-border: #e2e8f0;
+    --tooltip-border: #dde6f2;
   }
   [data-theme="light"] body { background: var(--bg); color: var(--text); }
-  [data-theme="light"] #sidebar { background: var(--sidebar); border-right-color: var(--border); }
-  [data-theme="light"] .sidebar-logo h1 { background: linear-gradient(135deg, #fff 0%, #93c5fd 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="light"] #sidebar { background: var(--sidebar); border-right-color: rgba(255,255,255,0.08); }
+  [data-theme="light"] .sidebar-logo h1 { background: linear-gradient(135deg, #fff 0%, #a5c4f8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   [data-theme="light"] .sidebar-logo p { color: #94a3b8; }
   [data-theme="light"] .nav-item { color: #94a3b8; }
-  [data-theme="light"] .nav-item:hover { background: rgba(37,99,235,0.08); color: var(--text); }
-  [data-theme="light"] .nav-item.active { background: rgba(37,99,235,0.12); color: #2563eb; border-left-color: var(--accent); }
-  [data-theme="light"] #dashboard { background: radial-gradient(ellipse at 20% 50%, rgba(37,99,235,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.06) 0%, transparent 60%), var(--bg); }
-  [data-theme="light"] #dashboard::before { background-image: radial-gradient(circle, rgba(37,99,235,0.08) 1px, transparent 1px); }
-  [data-theme="light"] .section-title { background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  [data-theme="light"] .card { background: var(--card); border-color: var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  [data-theme="light"] .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-  [data-theme="light"] .stat-card { background: var(--card); border-color: var(--border); }
-  [data-theme="light"] .theme-btn { background: rgba(30,41,59,0.9); color: #e2e8f0; border-color: rgba(255,255,255,0.15); }
+  [data-theme="light"] .nav-item:hover { background: rgba(79,126,248,0.07); color: #e2e8f0; }
+  [data-theme="light"] .nav-item.active { background: rgba(79,126,248,0.14); color: #a5c4f8; border-left-color: #7aaaf7; }
+  [data-theme="light"] #dashboard {
+    background: radial-gradient(ellipse at 20% 50%, rgba(79,126,248,0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(139,104,240,0.04) 0%, transparent 60%),
+                var(--bg);
+  }
+  [data-theme="light"] #dashboard::before { background-image: radial-gradient(circle, rgba(79,126,248,0.06) 1px, transparent 1px); opacity: 0.6; }
+  [data-theme="light"] .section-title { background: linear-gradient(135deg, #1e2d45 0%, #4f7ef8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  /* 카드 — 흰 배경에 매우 부드러운 파스텔 그림자 */
+  [data-theme="light"] .card {
+    background: linear-gradient(160deg, #ffffff 0%, #f8faff 100%);
+    border-color: #eaf0fa;
+    box-shadow: 0 1px 4px rgba(79,126,248,0.06), 0 4px 16px rgba(79,126,248,0.04);
+  }
+  [data-theme="light"] .card:hover {
+    border-color: rgba(79,126,248,0.25);
+    box-shadow: 0 4px 20px rgba(79,126,248,0.1);
+  }
+  [data-theme="light"] .kpi-card {
+    background: linear-gradient(155deg, #ffffff 0%, #f4f8ff 100%);
+    border-color: #e8eef8;
+    box-shadow: 0 1px 6px rgba(79,126,248,0.07);
+  }
+  [data-theme="light"] .kpi-card:hover { border-color: rgba(79,126,248,0.3); box-shadow: 0 4px 16px rgba(79,126,248,0.12); }
+  [data-theme="light"] .stat-card { background: #fff; border-color: var(--border); }
+  [data-theme="light"] .theme-btn { background: rgba(30,41,59,0.88); color: #e2e8f0; border-color: rgba(255,255,255,0.12); }
   [data-theme="light"] .theme-btn:hover { background: #0f172a; }
   [data-theme="light"] #themeToggle { color: #cbd5e1; }
   [data-theme="light"] #themeToggle:hover { color: #e2e8f0; background: rgba(255,255,255,0.08); }
-  [data-theme="light"] .kpi-value { color: #0f172a; }
-  [data-theme="light"] .card-title { color: #1e40af; }
+  [data-theme="light"] .kpi-value { color: #1e2d45; }
+  [data-theme="light"] .card-title { color: #3660b8; }
   [data-theme="light"] .nav-label { color: #64748b; }
   [data-theme="light"] .section-sub { color: var(--text-muted); }
   [data-theme="light"] select, [data-theme="light"] button { border-color: var(--border); }
+  /* 히어로 타이틀 — 부드러운 파스텔 그라디언트 */
+  [data-theme="light"] .hero-title {
+    background: linear-gradient(135deg, #1e2d45 0%, #4f7ef8 60%, #8b68f0 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  /* 섹션 구분선 */
+  [data-theme="light"] .section-divider { border-top-color: #eaf0fa; }
+  /* 필터 버튼 */
+  [data-theme="light"] .filter-btn { background: #f4f8ff; border-color: #dde8f8; color: #6080b0; }
+  [data-theme="light"] .filter-btn:hover { background: #eaf1ff; border-color: #b8ccf0; color: #3660b8; }
+  [data-theme="light"] .filter-btn.active { background: linear-gradient(135deg, #4f7ef8, #8b68f0); border-color: #4f7ef8; color: #fff; }
+  /* 칩 */
+  [data-theme="light"] .chip { background: #f4f8ff; border-color: #dde8f8; color: #6080b0; }
+  [data-theme="light"] .chip:hover { border-color: #4f7ef8; color: #3660b8; }
+  [data-theme="light"] .chip.active { background: linear-gradient(135deg,#4f7ef8,#8b68f0); border-color: #4f7ef8; color:#fff; }
+  /* 아이콘 버튼 */
+  [data-theme="light"] .icon-btn { background: #f0f5ff; border-color: #dde8f8; color: #6080b0; }
+  [data-theme="light"] .icon-btn:hover { background: #ddeaff; border-color: #4f7ef8; color: #3660b8; }
+  /* 인풋 */
+  [data-theme="light"] .select-input, [data-theme="light"] .ma-select {
+    background: #f8faff; border-color: #dde8f8; color: #1e2d45;
+  }
+  /* 비교 패널 */
+  [data-theme="light"] .compare-panel { background: #f8faff; border-color: #e2ecf8; }
+  [data-theme="light"] .compare-controls { background: #f8faff; border-color: #e2ecf8; }
+  [data-theme="light"] .compare-insight { background: linear-gradient(135deg,rgba(79,126,248,0.04),rgba(139,104,240,0.04)); border-color: rgba(79,126,248,0.18); }
+  /* 전체화면 모달 */
+  [data-theme="light"] #fsInner { background: linear-gradient(160deg,#ffffff,#f4f8ff); border-color: #dde8f8; }
+  [data-theme="light"] #fsTitle { color: #3660b8; }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
   body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; display: flex; min-height: 100vh; }
@@ -369,18 +417,9 @@
   }
 
   /* ── 라이트 모드 색상 보강 ─────────────────────── */
-  [data-theme="light"] .kpi-value        { color: #0f172a; }
-  [data-theme="light"] .card-title       { color: #1e3a5f; }
-  [data-theme="light"] .kpi-year-badge   { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #475569; }
-  [data-theme="light"] .stats-table td   { border-bottom-color: var(--border); }
-  [data-theme="light"] .stats-table tr:hover td { background: rgba(37,99,235,0.04); }
-  [data-theme="light"] .filter-btn       { color: #475569; }
-  [data-theme="light"] .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  [data-theme="light"] .chip             { color: #475569; }
-  [data-theme="light"] .icon-btn         { color: #475569; }
-  [data-theme="light"] .select-input, [data-theme="light"] .ma-select { background: #fff; color: #0f172a; }
-  [data-theme="light"] #fsInner          { background: #fff; border-color: var(--border); }
-  [data-theme="light"] #fsTitle          { color: #1e3a5f; }
+  [data-theme="light"] .kpi-year-badge   { background: rgba(79,126,248,0.07); border-color: rgba(79,126,248,0.2); color: #6080b0; }
+  [data-theme="light"] .stats-table td   { border-bottom-color: #eaf0fa; }
+  [data-theme="light"] .stats-table tr:hover td { background: rgba(79,126,248,0.03); }
 
   /* ── 반응형 ────────────────────────────────────── */
   /* 태블릿 (≤ 1024px) */
@@ -38435,17 +38474,22 @@ function TOOLTIP_DEFAULTS() {
 let _chartColorCache = {};
 function _refreshChartColorCache() {
   const s = getComputedStyle(document.documentElement);
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   _chartColorCache = {
-    grid:    s.getPropertyValue('--chart-grid').trim()   || 'rgba(26,45,74,0.5)',
-    tick:    s.getPropertyValue('--chart-tick').trim()   || '#4d7090',
-    tipBg:   s.getPropertyValue('--tooltip-bg').trim()   || '#0d1520',
-    tipBord: s.getPropertyValue('--tooltip-border').trim() || '#1a2d4a',
+    grid:      s.getPropertyValue('--chart-grid').trim()         || 'rgba(26,45,74,0.5)',
+    tick:      s.getPropertyValue('--chart-tick').trim()         || '#4d7090',
+    tipBg:     s.getPropertyValue('--tooltip-bg').trim()         || '#0d1520',
+    tipBord:   s.getPropertyValue('--tooltip-border').trim()     || '#1a2d4a',
+    dnutBord:  isLight ? 'rgba(245,247,251,0.9)' : '#111e30',
+    dnutBordW: isLight ? 1 : 2,
   };
 }
-function GRID_COLOR()    { return _chartColorCache.grid    || 'rgba(26,45,74,0.5)'; }
-function TICK_COLOR()    { return _chartColorCache.tick    || '#4d7090'; }
-function TOOLTIP_BG()    { return _chartColorCache.tipBg   || '#0d1520'; }
-function TOOLTIP_BORDER(){ return _chartColorCache.tipBord || '#1a2d4a'; }
+function GRID_COLOR()          { return _chartColorCache.grid      || 'rgba(26,45,74,0.5)'; }
+function TICK_COLOR()          { return _chartColorCache.tick      || '#4d7090'; }
+function TOOLTIP_BG()          { return _chartColorCache.tipBg     || '#0d1520'; }
+function TOOLTIP_BORDER()      { return _chartColorCache.tipBord   || '#1a2d4a'; }
+function DOUGHNUT_BORDER()     { return _chartColorCache.dnutBord  || '#111e30'; }
+function DOUGHNUT_BORDER_W()   { return _chartColorCache.dnutBordW !== undefined ? _chartColorCache.dnutBordW : 2; }
 
 function baseScales() {
   const g = GRID_COLOR(), t = TICK_COLOR();
@@ -38803,7 +38847,7 @@ function buildRadar() {
           min: 0, max: 100,
           grid: { color: GRID_COLOR() },
           ticks: { color: TICK_COLOR(), stepSize: 20, backdropColor: 'transparent', callback: v => v + '%' },
-          pointLabels: { color: '#c8deff', font: { size: 12 } },
+          pointLabels: { color: TICK_COLOR(), font: { size: 12 } },
         }
       }
     }
@@ -39218,7 +39262,7 @@ function makeDoughnutOptions(dataArr, labelsArr, colorsArr) {
       legend: {
         position: 'right',
         labels: {
-          color: '#8aaccc', boxWidth: 12, font: { size: 11 },
+          color: TICK_COLOR(), boxWidth: 12, font: { size: 11 },
           generateLabels(chart) {
             const ds = chart.data.datasets[0];
             return chart.data.labels.map((lbl, i) => {
@@ -39266,7 +39310,7 @@ function buildSessionsDoughnut(year) {
   if (sessionsDoughnutChart) sessionsDoughnutChart.destroy();
   sessionsDoughnutChart = new Chart(document.getElementById('sessionsDoughnut'), {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#111e30', hoverOffset: 8 }] },
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: DOUGHNUT_BORDER_W(), borderColor: DOUGHNUT_BORDER(), hoverOffset: 8 }] },
     options: makeDoughnutOptions(data, labels, colors),
   });
 }
@@ -39366,7 +39410,7 @@ function buildSchoolDoughnut(year) {
   if (schoolDoughnutChart) schoolDoughnutChart.destroy();
   schoolDoughnutChart = new Chart(document.getElementById('schoolDoughnut'), {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#111e30', hoverOffset: 8 }] },
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: DOUGHNUT_BORDER_W(), borderColor: DOUGHNUT_BORDER(), hoverOffset: 8 }] },
     options: makeDoughnutOptions(data, labels, colors),
   });
 }
