@@ -468,10 +468,17 @@
     #sidebarOverlay { display: none !important; }
   }
 
+  /* 모바일 차트 높이 보정 — 도넛 제외 */
+  @media (max-width: 768px) {
+    canvas:not(.kpi-sparkline) { min-height: 260px; }
+    canvas[id$="Doughnut"], canvas[id$="doughnut"], canvas[id="deptChart"] { min-height: unset; }
+  }
+
   /* 소형 모바일 (≤ 480px) */
   @media (max-width: 480px) {
     .kpi-grid { grid-template-columns: 1fr; }
     .kpi-value { font-size: 26px; }
+    canvas:not(.kpi-sparkline) { min-height: 220px; }
   }
 </style>
 </head>
@@ -38494,16 +38501,19 @@ function DOUGHNUT_BORDER_W()   { return _chartColorCache.dnutBordW !== undefined
 function baseScales() {
   const g = GRID_COLOR(), t = TICK_COLOR();
   return {
-    x: { grid: { color: g, drawBorder: false }, ticks: { color: t, maxRotation: 0, maxTicksLimit: 14, autoSkip: true, font: { size: 11 } }, border: { display: false } },
-    y: { grid: { color: g, drawBorder: false }, ticks: { color: t, font: { size: 11 } }, border: { display: false } }
+    x: { grid: { color: g, lineWidth: 0.5, drawBorder: false }, ticks: { color: t, maxRotation: 0, maxTicksLimit: 14, autoSkip: true, font: { size: 11 } }, border: { display: false } },
+    y: { grid: { color: g, lineWidth: 0.5, drawBorder: false }, ticks: { color: t, font: { size: 11 } }, border: { display: false } }
   };
 }
 
+function isMobile() { return window.innerWidth <= 768; }
+
 function baseOptions(ar) {
+  const mobileAr = Math.min(ar || 4.5, 1.5); // 모바일에서 최대 1.5 비율 (더 높게)
   return {
     responsive: true,
     maintainAspectRatio: true,
-    aspectRatio: ar || 4.5,
+    aspectRatio: isMobile() ? mobileAr : (ar || 4.5),
     spanGaps: true,
     animation: { duration: 500, easing: 'easeInOutQuart' },
     elements: {
@@ -38845,7 +38855,7 @@ function buildRadar() {
       scales: {
         r: {
           min: 0, max: 100,
-          grid: { color: GRID_COLOR() },
+          grid: { color: GRID_COLOR(), lineWidth: 0.5 },
           ticks: { color: TICK_COLOR(), stepSize: 20, backdropColor: 'transparent', callback: v => v + '%' },
           pointLabels: { color: TICK_COLOR(), font: { size: 12 } },
         }
@@ -39018,8 +39028,8 @@ function buildAnnualCharts() {
       ...baseOptions(3),
       plugins: { ...baseOptions(3).plugins, zoom: undefined, legend: { display: true, position: 'bottom', labels: { color: '#8aaccc', boxWidth: 10, font: { size: 11 } } } },
       scales: {
-        x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
-        y: { stacked: true, grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } }
+        x: { grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } },
+        y: { stacked: true, grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } }
       }
     }
   });
@@ -39202,8 +39212,8 @@ function buildSessionsStackBar() {
       ...baseOptions(2.5),
       plugins: { ...baseOptions(2.5).plugins, zoom: undefined },
       scales: {
-        x: { stacked: true, grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
-        y: { stacked: true, grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } }
+        x: { stacked: true, grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } },
+        y: { stacked: true, grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } }
       }
     }
   });
@@ -39385,8 +39395,8 @@ function buildSchoolStackBar() {
       ...baseOptions(2.5),
       plugins: { ...baseOptions(2.5).plugins, zoom: undefined },
       scales: {
-        x: { stacked: true, grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR(), maxRotation: 45 } },
-        y: { stacked: true, grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } }
+        x: { stacked: true, grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR(), maxRotation: 45 } },
+        y: { stacked: true, grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } }
       }
     }
   });
@@ -39531,7 +39541,7 @@ function buildDawnRadar() {
       scales: {
         r: {
           min: 0, max: 100,
-          grid: { color: GRID_COLOR() },
+          grid: { color: GRID_COLOR(), lineWidth: 0.5 },
           ticks: { color: TICK_COLOR(), backdropColor: 'transparent', callback: v => v + '%' },
           pointLabels: { color: '#c8deff', font: { size: 11 } }
         }
@@ -39941,9 +39951,9 @@ function buildGrowthSection() {
       ...baseOptions(3.5),
       plugins: { ...baseOptions(3.5).plugins, zoom: undefined, tooltip: growthTooltip },
       scales: {
-        x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
+        x: { grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } },
         y: {
-          grid: { color: GRID_COLOR() },
+          grid: { color: GRID_COLOR(), lineWidth: 0.5 },
           ticks: { color: TICK_COLOR(), callback: v => v + '%' }
         }
       }
@@ -40017,8 +40027,8 @@ function buildGrowthSection() {
       ...baseOptions(2.5),
       plugins: { ...baseOptions(2.5).plugins, zoom: undefined, tooltip: growthTooltip },
       scales: {
-        x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
-        y: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR(), callback: v => v + '%' } }
+        x: { grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } },
+        y: { grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR(), callback: v => v + '%' } }
       }
     }
   });
@@ -40045,10 +40055,10 @@ function buildGrowthSection() {
       ...baseOptions(2.5),
       plugins: { ...baseOptions(2.5).plugins, zoom: undefined, legend: { display: false } },
       scales: {
-        x: { grid: { color: GRID_COLOR() }, ticks: { color: TICK_COLOR() } },
+        x: { grid: { color: GRID_COLOR(), lineWidth: 0.5 }, ticks: { color: TICK_COLOR() } },
         y: {
           min: 2009, max: 2026,
-          grid: { color: GRID_COLOR() },
+          grid: { color: GRID_COLOR(), lineWidth: 0.5 },
           ticks: { color: TICK_COLOR(), stepSize: 1, callback: v => String(v) }
         }
       }
